@@ -22,4 +22,40 @@ resource "aws_elastic_beanstalk_environment" "environment" {
         name      = "IamInstanceProfile"
         value     = "aws-elasticbeanstalk-ec2-role"
       }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REDIS_ENDPOINT"
+    value     = aws_elasticache_replication_group.example.primary_endpoint_address
+  }
+}
+
+resource "aws_vpc" "foo" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "tf-test"
+  }
+}
+
+resource "aws_subnet" "foo" {
+  vpc_id            = aws_vpc.foo.id
+  cidr_block        = "10.0.0.0/24"
+  availability_zone = "us-east-1a"
+
+  tags = {
+    Name = "tf-test"
+  }
+}
+
+resource "aws_elasticache_subnet_group" "example" {
+  name       = "example"
+  subnet_ids = [aws_subnet.foo.id]
+}
+
+resource "aws_elasticache_replication_group" "example" {
+  replication_group_id = "example"
+  description         = "teste"
+  node_type            = "cache.m4.large"
+  port                 = 6379
+  subnet_group_name    = aws_elasticache_subnet_group.example.name
 }
