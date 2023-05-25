@@ -1,0 +1,10 @@
+{
+"CloudWatchMetrics":
+    {
+      "Environment":
+        {
+        "ApplicationRequestsTotal": 60
+        }
+      },
+    "Version":1
+}
