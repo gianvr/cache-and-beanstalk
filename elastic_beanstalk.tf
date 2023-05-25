@@ -17,21 +17,38 @@ resource "aws_iam_instance_profile" "beanstalk_instance_profile" {
   role = aws_iam_role.beanstalk.name
 }
 
+resource "aws_security_group" "allow_redis" {
+  name      = "allow_redis"
+  ingress  {
+    description =  "Allow Redis" 
+    from_port        = 6379
+    to_port          = 6379
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_elastic_beanstalk_environment" "environment" {
   name                = "beanstalk-env"
   application         = aws_elastic_beanstalk_application.application.name
-  solution_stack_name = "64bit Amazon Linux 2 v3.5.2 running Python 3.8"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.0.0 running Python 3.11"
+
 
   setting {
         namespace = "aws:autoscaling:launchconfiguration"
         name      = "IamInstanceProfile"
         value     = "aws-elasticbeanstalk-ec2-role"
       }
-  # setting {
-  #   namespace = "aws:elasticbeanstalk:application:environment"
-  #   name      = "REDIS_ENDPOINT"
-  #   value     = aws_elasticache_replication_group.cache_replication_group_beanstalk.primary_endpoint_address
-  # }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REDIS_ENDPOINT"
+    value     = aws_elasticache_cluster.example.cache_nodes.0.address
+  }
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = aws_security_group.allow_redis.name
+  }
 }
 
 resource "aws_s3_bucket" "bucket_applicationversion" {
@@ -52,29 +69,12 @@ resource "aws_elastic_beanstalk_application_version" "default" {
   key         = aws_s3_object.bucket_object.id
 }
 
-output "aws_command" {
-  value = "aws elasticbeanstalk update-environment --application-name ${aws_elastic_beanstalk_application.application.name} --version-label ${aws_elastic_beanstalk_application_version.default.name} --environment-name ${aws_elastic_beanstalk_environment.environment.name}"
+resource "aws_elasticache_cluster" "example" {
+  cluster_id           = "cluster-example"
+  engine               = "redis"
+  node_type            = "cache.t2.micro"
+  num_cache_nodes      = 1
+  parameter_group_name = "default.redis7"
+  port                 = 6379
+  security_group_ids   = [aws_security_group.allow_redis.id]
 }
-
-# resource "aws_vpc" "vpc" {
-#   cidr_block = "10.0.0.0/16"
-# }
-
-# resource "aws_subnet" "subnet_cache" {
-#   vpc_id            = aws_vpc.vpc.id
-#   cidr_block        = "10.0.0.0/24"
-#   availability_zone = "us-east-1a"
-# }
-
-# resource "aws_elasticache_subnet_group" "subnet_group_cache" {
-#   name       = "subnet-group-cache"
-#   subnet_ids = [aws_subnet.subnet_cache.id]
-# }
-
-# resource "aws_elasticache_replication_group" "cache_replication_group_beanstalk" {
-#   replication_group_id = "cache-replication-group-beanstalk"
-#   description          = "beanstalk-redis"
-#   node_type            = "cache.m4.large"
-#   port                 = 6379
-#   subnet_group_name    = aws_elasticache_subnet_group.subnet_group_cache.name
-# }
