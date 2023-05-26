@@ -1,5 +1,5 @@
 resource "aws_elastic_beanstalk_application" "application" {
-  name        = "app-beanstalk"
+  name        = var.app_name
 }
 
 resource "aws_security_group" "allow_redis" {
@@ -14,7 +14,7 @@ resource "aws_security_group" "allow_redis" {
 }
 
 resource "aws_elastic_beanstalk_environment" "environment" {
-  name                = "beanstalk-environment"
+  name                = var.environment_name
   application         = aws_elastic_beanstalk_application.application.name
   solution_stack_name = "64bit Amazon Linux 2023 v4.0.0 running Python 3.11"
   setting {
@@ -25,7 +25,7 @@ resource "aws_elastic_beanstalk_environment" "environment" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "REDIS_ENDPOINT"
-    value     = aws_elasticache_cluster.example.cache_nodes.0.address
+    value     = var.redis_endpoint
   }
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -55,10 +55,10 @@ resource "aws_elastic_beanstalk_environment" "environment" {
 }
 
 
-resource "aws_elastic_beanstalk_application_version" "default" {
-  name        = "versao-teste"
-  application = "app-beanstalk"
-  description = "application version created by terraform"
-  bucket      = aws_s3_bucket.bucket_applicationversion.id
-  key         = aws_s3_object.bucket_object.id
+resource "aws_elastic_beanstalk_application_version" "app_version" {
+  name        = var.app_version
+  application = var.app_name
+  description = var.app_version_description
+  bucket      = var.bucket_id
+  key         = var.bucket_object_id
 }

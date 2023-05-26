@@ -9,7 +9,7 @@ resource "aws_cloudwatch_metric_alarm" "requests" {
     period = 60
     statistic = "Average"
     dimensions = {
-        EnvironmentName = aws_elastic_beanstalk_environment.environment.name
+        EnvironmentName = var.environment_name
     }
 }
 
@@ -24,7 +24,7 @@ resource "aws_cloudwatch_metric_alarm" "environment_health" {
     period = 60
     statistic = "Average"
     dimensions = {
-        EnvironmentName = aws_elastic_beanstalk_environment.environment.name
+        EnvironmentName = var.environment_name
     }
   
 }
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_capacity" {
     period = 60
     statistic = "Average"
     dimensions = {
-        CacheClusterId = aws_elasticache_cluster.example.id
+        CacheClusterId = var.cluster_id
     }
 }
 
@@ -55,7 +55,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
     period = 60
     statistic = "Average"
     dimensions = {
-        CacheClusterId = aws_elasticache_cluster.example.id
+        CacheClusterId = var.cluster_id
     }
 }
 
@@ -70,7 +70,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_network_in" {
     period = 60
     statistic = "Sum"
     dimensions = {
-        CacheClusterId = aws_elasticache_cluster.example.id
+        CacheClusterId = var.cluster_id
     }
 }
 
@@ -85,7 +85,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_network_out" {
     period = 60
     statistic = "Sum"
     dimensions = {
-        CacheClusterId = aws_elasticache_cluster.example.id
+        CacheClusterId = var.cluster_id
     }
 }
 
@@ -100,7 +100,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_misses" {
     period = 60
     statistic = "Average"
     dimensions = {
-        CacheClusterId = aws_elasticache_cluster.example.id
+        CacheClusterId = var.cluster_id
     }
 }
 
@@ -116,7 +116,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_auto_scaling" {
     period = 60
     statistic = "Average"
     dimensions = {
-        AutoScalingGroupName = aws_elastic_beanstalk_environment.environment.autoscaling_groups[0]
+        AutoScalingGroupName = var.beanstalk_autoscaling_group
     }
 }
 
@@ -131,7 +131,7 @@ resource "aws_cloudwatch_metric_alarm" "credit_balance_auto_scaling" {
     period = 60
     statistic = "Minimum"
     dimensions = {
-        AutoScalingGroupName = aws_elastic_beanstalk_environment.environment.autoscaling_groups[0]
+        AutoScalingGroupName = var.beanstalk_autoscaling_group
     }
 }
 
@@ -146,6 +146,6 @@ resource "aws_cloudwatch_metric_alarm" "credit_usage_auto_scaling" {
     period = 60
     statistic = "Maximum"
     dimensions = {
-        AutoScalingGroupName = aws_elastic_beanstalk_environment.environment.autoscaling_groups[0]
+        AutoScalingGroupName = var.beanstalk_autoscaling_group
     }
 }

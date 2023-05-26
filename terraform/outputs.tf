@@ -1,3 +1,3 @@
 output "aws_command" {
-  value = "aws elasticbeanstalk update-environment --application-name ${aws_elastic_beanstalk_application.application.name} --version-label ${aws_elastic_beanstalk_application_version.default.name} --environment-name ${aws_elastic_beanstalk_environment.environment.name}"
+  value = "aws elasticbeanstalk update-environment --application-name ${var.app_name} --version-label ${var.app_version} --environment-name ${var.environment_name}"
 }
